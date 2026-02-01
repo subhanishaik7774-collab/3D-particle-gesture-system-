@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Real-time interactive 3D particle system controlled by hand gestures using Three.js and MediaPipe">
+    <title>Gesture-Controlled 3D Particle System</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loader-container">
+            <div class="orbit-loader">
+                <div class="planet"></div>
+                <div class="ring"></div>
+                <div class="ring ring2"></div>
+            </div>
+            <h2>Initializing Particle Universe</h2>
+            <p id="loading-status">Loading Three.js...</p>
+        </div>
+    </div>
+
+    <!-- Main Canvas -->
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- Video Feed (Hidden but used for tracking) -->
+    <video id="camera-feed" autoplay playsinline></video>
+    
+    <!-- Camera Preview -->
+    <div id="camera-preview">
+        <canvas id="hand-canvas"></canvas>
+        <div class="camera-label">Hand Tracking</div>
+    </div>
+
+    <!-- HUD Overlay -->
+    <div id="hud">
+        <div class="hud-section hud-top-left">
+            <div class="stat-box">
+                <span class="stat-label">PARTICLES</span>
+                <span class="stat-value" id="particle-count">0</span>
+            </div>
+            <div class="stat-box">
+                <span class="stat-label">FPS</span>
+                <span class="stat-value" id="fps-counter">60</span>
+            </div>
+        </div>
+
+        <div class="hud-section hud-top-center">
+            <h1 class="title">PARTICLE UNIVERSE</h1>
+            <p class="subtitle">Control with your hands</p>
+        </div>
+
+        <div class="hud-section hud-top-right">
+            <div class="gesture-indicator">
+                <div class="gesture-icon" id="gesture-icon">✋</div>
+                <span id="gesture-name">No Hand Detected</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Control Panel -->
+    <div id="control-panel">
+        <div class="panel-header">
+            <span class="panel-icon">⚙️</span>
+            <span>CONTROLS</span>
+            <button id="toggle-panel" class="toggle-btn">−</button>
+        </div>
+        <div class="panel-content">
+            <div class="control-group">
+                <label>Particle Templates (20 Models!)</label>
+                <div class="template-grid" id="template-grid">
+                    <button class="template-btn active" data-template="solarsystem">
+                        <span class="template-icon">🌍</span>
+                        <span>Solar</span>
+                    </button>
+                    <button class="template-btn" data-template="sphere">
+                        <span class="template-icon">⚪</span>
+                        <span>Sphere</span>
+                    </button>
+                    <button class="template-btn" data-template="heart">
+                        <span class="template-icon">❤️</span>
+                        <span>Heart</span>
+                    </button>
+                    <button class="template-btn" data-template="flower">
+                        <span class="template-icon">🌸</span>
+                        <span>Flower</span>
+                    </button>
+                    <button class="template-btn" data-template="saturn">
+                        <span class="template-icon">🪐</span>
+                        <span>Saturn</span>
+                    </button>
+                    <button class="template-btn" data-template="firework">
+                        <span class="template-icon">🎆</span>
+                        <span>Fireworks</span>
+                    </button>
+                    <button class="template-btn" data-template="galaxy">
+                        <span class="template-icon">🌌</span>
+                        <span>Galaxy</span>
+                    </button>
+                    <button class="template-btn" data-template="dna">
+                        <span class="template-icon">🧬</span>
+                        <span>DNA</span>
+                    </button>
+                    <button class="template-btn" data-template="star">
+                        <span class="template-icon">⭐</span>
+                        <span>Star</span>
+                    </button>
+                    <button class="template-btn" data-template="cube">
+                        <span class="template-icon">🎲</span>
+                        <span>Cube</span>
+                    </button>
+                    <button class="template-btn" data-template="cone">
+                        <span class="template-icon">🔺</span>
+                        <span>Cone</span>
+                    </button>
+                    <button class="template-btn" data-template="torus">
+                        <span class="template-icon">⭕</span>
+                        <span>Torus</span>
+                    </button>
+                    <button class="template-btn" data-template="icosahedron">
+                        <span class="template-icon">💎</span>
+                        <span>Crystal</span>
+                    </button>
+                    <button class="template-btn" data-template="spiral">
+                        <span class="template-icon">🌀</span>
+                        <span>Spiral</span>
+                    </button>
+                    <button class="template-btn" data-template="wave">
+                        <span class="template-icon">〰️</span>
+                        <span>Wave</span>
+                    </button>
+                    <button class="template-btn" data-template="helix">
+                        <span class="template-icon">🧬</span>
+                        <span>Helix</span>
+                    </button>
+                    <button class="template-btn" data-template="crystal">
+                        <span class="template-icon">✨</span>
+                        <span>Shards</span>
+                    </button>
+                    <button class="template-btn" data-template="lattice">
+                        <span class="template-icon">⬜</span>
+                        <span>Lattice</span>
+                    </button>
+                    <button class="template-btn" data-template="vortex">
+                        <span class="template-icon">🌪️</span>
+                        <span>Vortex</span>
+                    </button>
+                    <button class="template-btn" data-template="ring">
+                        <span class="template-icon">💍</span>
+                        <span>Ring</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Color Theme</label>
+                <div class="color-options" id="color-options">
+                    <button class="color-btn active" data-color="rainbow" style="background: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #8b00ff)"></button>
+                    <button class="color-btn" data-color="fire" style="background: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00)"></button>
+                    <button class="color-btn" data-color="ice" style="background: linear-gradient(45deg, #00ffff, #0080ff, #0000ff)"></button>
+                    <button class="color-btn" data-color="nature" style="background: linear-gradient(45deg, #00ff00, #32cd32, #228b22)"></button>
+                    <button class="color-btn" data-color="sunset" style="background: linear-gradient(45deg, #ff6b6b, #ffa500, #ff69b4)"></button>
+                    <button class="color-btn" data-color="neon" style="background: linear-gradient(45deg, #ff00ff, #00ffff, #ffff00)"></button>
+                </div>
+            </div>
+
+            <div class="control-group">
+                <label>Particle Count: <span id="count-value">5000</span></label>
+                <input type="range" id="particle-slider" min="1000" max="20000" value="5000" step="500">
+            </div>
+
+            <div class="control-group">
+                <label>Particle Size: <span id="size-value">3</span></label>
+                <input type="range" id="size-slider" min="1" max="10" value="3" step="0.5">
+            </div>
+
+            <div class="control-group">
+                <label>Animation Speed: <span id="speed-value">1.0</span>x</label>
+                <input type="range" id="speed-slider" min="0.1" max="3" value="1" step="0.1">
+            </div>
+
+            <div class="control-group toggle-row">
+                <label>Hand Tracking</label>
+                <label class="switch">
+                    <input type="checkbox" id="tracking-toggle" checked>
+                    <span class="slider-toggle"></span>
+                </label>
+            </div>
+
+            <div class="control-group toggle-row">
+                <label>Auto Rotate</label>
+                <label class="switch">
+                    <input type="checkbox" id="rotate-toggle" checked>
+                    <span class="slider-toggle"></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gesture Guide -->
+    <div id="gesture-guide">
+        <div class="guide-header">
+            <span>🤚 Gesture Guide (12 Gestures!)</span>
+            <button id="close-guide">×</button>
+        </div>
+        <div class="guide-content">
+            <div class="gesture-item">
+                <div class="gesture-demo">✋</div>
+                <div class="gesture-info">
+                    <strong>Open Palm</strong>
+                    <p>Expand particles outward</p>
+                </div>
+            </div>
+            <div class="gesture-item">
+                <div class="gesture-demo">✊</div>
+                <div class="gesture-info">
+                    <strong>Closed Fist</strong>
+                    <p>Contract particles inward</p>
+                </div>
+            </div>
+            <div class="gesture-item">
+                <div class="gesture-demo">☝️</div>
+                <div class="gesture-info">
+                    <strong>Point Up</strong>
+                    <p>Switch to next template</p>
+                </div>
+            </div>
+            <div class="gesture-item">
+                <div class="gesture-demo">🤟</div>
+                <div class="gesture-info">
+                    <strong>Rock Sign</strong>
+                    <p>Trigger firework burst</p>
+                </div>
+            </div>
+            <div class="gesture-item">
+                <div class="gesture-demo">✌️</div>
+                <div class="gesture-info">
+                    <strong>Peace Sign</strong>
+                    <p>Change color theme</p>
+                </div>
+            </div>
+            <div class="gesture-item">
+                <div class="gesture-demo">👍</div>
+                <div class="gesture-info">
+                    <strong>Thumbs Up</strong>
+                    <p>Speed up animation</p>
+                </div>
+            </div>
+            <div class="gesture-item">
+                <div class="gesture-demo">👎</div>
+                <div class="gesture-info">
+                    <strong>Thumbs Down</strong>
+                    <p>Previous template</p>
+                </div>
+            </div>
+            <div class="gesture-item">
+                <div class="gesture-demo">🤏</div>
+                <div class="gesture-info">
+                    <strong>Pinch</strong>
+                    <p>Toggle hand tracking</p>
+                </div>
+            </div>
+            <div class="gesture-item">
+                <div class="gesture-demo">🤞</div>
+                <div class="gesture-info">
+                    <strong>Victory Sign</strong>
+                    <p>Random template</p>
+                </div>
+            </div>
+            <div class="gesture-item">
+                <div class="gesture-demo">🤚</div>
+                <div class="gesture-info">
+                    <strong>Hand Grab</strong>
+                    <p>Pause animation</p>
+                </div>
+            </div>
+            <div class="gesture-item">
+                <div class="gesture-demo">👋</div>
+                <div class="gesture-info">
+                    <strong>Wave Hand</strong>
+                    <p>Speed down</p>
+                </div>
+            </div>
+            <div class="gesture-item">
+                <div class="gesture-demo">🖐️</div>
+                <div class="gesture-info">
+                    <strong>Stop Sign</strong>
+                    <p>Reset animation</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button id="show-guide" class="guide-btn">🤚 Gestures</button>
+
+    <!-- Scripts -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+    }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script type="module" src="main.js"></script>
+</body>
+</html>
