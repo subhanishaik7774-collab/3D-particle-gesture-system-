@@ -276,7 +276,7 @@ For issues or feature requests, please create an issue on the GitHub repository.
    npx serve .
    ```
 
-3. Open your browser to `http://localhost:8000`.
+3. Open your browser to http://127.0.0.1:5500/index.html
 4. **Allow camera access** when prompted to enable hand tracking.
 
 ## 🛠️ Technologies Used
