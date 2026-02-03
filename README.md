@@ -100,7 +100,7 @@ A cutting-edge real-time interactive 3D particle visualization system with hand 
    ```
 
 3. **Open in your browser**
-   - Navigate to `http://localhost:8000`
+   - Navigate to http://127.0.0.1:5500/index.html
    - Allow camera access when prompted
    - Start gesturing!
 
